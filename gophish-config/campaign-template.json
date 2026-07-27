@@ -1,0 +1,30 @@
+{
+  "name": "Zoop – Google Workspace Security Alert Sim",
+  "template": {
+    "name": "Google Workspace Security Alert",
+    "subject": "Security alert for your Google account",
+    "html": "email-templates/google-workspace-alert.html",
+    "text": "email-templates/google-workspace-alert.txt",
+    "from_address": "no-reply@accounts.google-workspace-alert.com",
+    "from_name": "Google"
+  },
+  "landing_page": {
+    "name": "Google Login – Credential Capture",
+    "html": "landing-pages/google-login.html",
+    "redirect_url": "https://your-server/awareness/training-page.html",
+    "capture_credentials": true,
+    "capture_passwords": true
+  },
+  "sending_profile": {
+    "name": "Zoop Sim SMTP",
+    "host": "smtp.your-mail-provider.com:587",
+    "username": "your-smtp-user@example.com",
+    "password": "your-smtp-password",
+    "from_address": "no-reply@accounts.google-workspace-alert.com",
+    "ignore_cert_errors": false
+  },
+  "url": "http://your-gophish-server",
+  "groups": ["All Zoop Employees"],
+  "launch_date": "2026-07-28T09:00:00Z",
+  "send_by_date": "2026-07-28T12:00:00Z"
+}

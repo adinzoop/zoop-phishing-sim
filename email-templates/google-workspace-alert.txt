@@ -1,0 +1,21 @@
+Security alert for your Google account
+
+Hi {{.FirstName}},
+
+We detected a sign-in attempt to your {{.Email}} account from an unrecognized device.
+To keep your account secure, we've temporarily limited access until you verify your identity.
+
+Sign-in details:
+  Device:   Unknown Linux device
+  Location: Frankfurt, Germany
+  Time:     {{.Date}} UTC
+
+Review your account activity here:
+{{.URL}}
+
+If this was you, you can ignore this email. If you don't recognize this activity,
+click the link above immediately to secure your account.
+
+---
+Google LLC
+1600 Amphitheatre Parkway, Mountain View, CA 94043

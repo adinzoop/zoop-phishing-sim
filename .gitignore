@@ -1,0 +1,17 @@
+# Secrets — never commit these
+scripts/service-account.json
+*.env
+.env*
+gophish-config/campaign-live.json
+
+# GoPhish database (contains captured creds)
+gophish.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store

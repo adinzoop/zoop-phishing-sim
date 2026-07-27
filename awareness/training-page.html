@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Awareness Training – Zoop</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Google Sans', Roboto, Arial, sans-serif;
+      background: #f1f3f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 48px 40px;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .icon { font-size: 56px; text-align: center; margin-bottom: 16px; }
+    h1 {
+      font-size: 26px;
+      font-weight: 500;
+      color: #d93025;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      font-size: 16px;
+      color: #5f6368;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .section { margin-bottom: 24px; }
+    .section h2 {
+      font-size: 16px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 8px;
+      padding-left: 8px;
+      border-left: 3px solid #1a73e8;
+    }
+    .section p, .section li {
+      font-size: 14px;
+      color: #3c4043;
+      line-height: 1.7;
+    }
+    .section ul { padding-left: 20px; }
+    .section li { margin-bottom: 6px; }
+    .red-flags {
+      background: #fce8e6;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .red-flags h2 { border-left-color: #d93025; }
+    .green-box {
+      background: #e6f4ea;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .green-box h2 { border-left-color: #0f9d58; }
+    .cta {
+      text-align: center;
+      margin-top: 32px;
+    }
+    .cta a {
+      display: inline-block;
+      background: #1a73e8;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .cta a:hover { background: #1558b0; }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #80868b;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🎣</div>
+    <h1>You were phished!</h1>
+    <p class="tagline">
+      This was a <strong>controlled phishing simulation</strong> run by Zoop's security team.
+      No real data was captured. You're safe — but let's make sure this doesn't happen with a real attack.
+    </p>
+
+    <div class="red-flags section">
+      <h2>Red flags in that email</h2>
+      <ul>
+        <li>The sender address didn't end in <strong>@google.com</strong> — always check carefully.</li>
+        <li>The email created urgency ("suspicious activity", "limited access") to make you act fast.</li>
+        <li>Hovering over the link would have shown an unfamiliar domain — not accounts.google.com.</li>
+        <li>Real Google security emails never ask for your password via email.</li>
+      </ul>
+    </div>
+
+    <div class="green-box section">
+      <h2>What to do when you get a suspicious email</h2>
+      <ul>
+        <li>Do <strong>not</strong> click links — go directly to the site by typing the URL yourself.</li>
+        <li>Check the sender's actual email address (not just the display name).</li>
+        <li>Report the email using the <strong>"Report phishing"</strong> button in Gmail.</li>
+        <li>If you're unsure, forward it to <strong>security@zoop.one</strong> before acting.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>How to check if a Google alert is real</h2>
+      <p>
+        Go to <strong>myaccount.google.com → Security → Recent security activity</strong> directly in
+        your browser. Real alerts are listed there. Never use a link from an email to check this.
+      </p>
+    </div>
+
+    <div class="cta">
+      <a href="https://myaccount.google.com/security" target="_blank">
+        Review your real Google account security →
+      </a>
+    </div>
+
+    <p class="footer">
+      Zoop Security Awareness Training &nbsp;·&nbsp; Questions? Email security@zoop.one
+    </p>
+  </div>
+</body>
+</html>
