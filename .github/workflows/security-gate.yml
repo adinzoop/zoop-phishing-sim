@@ -102,10 +102,44 @@ jobs:
           with open('/tmp/verdict.txt', 'w') as f:
               f.write(verdict)
 
+          # POST to local orchestrator via tunnel so findings appear in dashboard
+          orchestrator_url = os.environ.get('ORCHESTRATOR_TUNNEL_URL', '').rstrip('/')
+          if orchestrator_url:
+              try:
+                  pr_payload = json.dumps({
+                      "action": "synchronize",
+                      "repo": os.environ.get('GITHUB_REPOSITORY', ''),
+                      "pr_number": int(os.environ.get('PR_NUMBER', '0')),
+                      "head_sha": os.environ.get('GITHUB_SHA', 'unknown'),
+                      "base_sha": "",
+                      "head_ref": os.environ.get('GITHUB_HEAD_REF', ''),
+                      "base_ref": os.environ.get('GITHUB_BASE_REF', 'main'),
+                      "title": os.environ.get('PR_TITLE', ''),
+                      "draft": False,
+                      "additions": 0,
+                      "deletions": 0,
+                      "installation_id": 0,
+                      "glm_findings": findings,
+                  }).encode()
+                  tunnel_req = urllib.request.Request(
+                      f"{orchestrator_url}/scan/pr",
+                      data=pr_payload,
+                      headers={"Content-Type": "application/json"},
+                  )
+                  with urllib.request.urlopen(tunnel_req, timeout=15) as r:
+                      print(f"Orchestrator: {r.read().decode()}")
+              except Exception as ex:
+                  print(f"Orchestrator tunnel error (non-fatal): {ex}")
+
           print(f"Verdict: {verdict} | Findings: {len(findings)}")
           PYEOF
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ORCHESTRATOR_TUNNEL_URL: ${{ secrets.ORCHESTRATOR_TUNNEL_URL }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
 
       - name: Post PR comment
         uses: actions/github-script@v7
