@@ -21,7 +21,6 @@ jobs:
       - name: Get PR diff
         run: |
           git diff origin/${{ github.base_ref }}...HEAD > /tmp/pr.diff
-          # Cap at 12000 chars to stay within GLM token limit
           head -c 12000 /tmp/pr.diff > /tmp/pr_scan.diff
           echo "Diff size: $(wc -c < /tmp/pr.diff) bytes"
 
@@ -35,8 +34,10 @@ jobs:
 
           if not diff:
               print("No diff — marking as pass")
-              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-                  f.write('findings=[]\nverdict=pass\ncount=0\n')
+              with open('/tmp/findings.json', 'w') as f:
+                  json.dump([], f)
+              with open('/tmp/verdict.txt', 'w') as f:
+                  f.write('pass')
               sys.exit(0)
 
           system = (
@@ -49,7 +50,7 @@ jobs:
               '"owasp_tag": string|null, "exploitable": boolean, '
               '"remediation": string, "evidence": string|null}\n'
               "Only flag lines added in this diff (lines starting with +).\n"
-              "Return {\"findings\":[]} if the diff is clean.\n"
+              'Return {"findings":[]} if the diff is clean.\n'
               "Respond with valid JSON only — no markdown, no code fences."
           )
 
@@ -80,7 +81,6 @@ jobs:
               sys.exit(1)
 
           text = data['choices'][0]['message']['content'].strip()
-          # Strip accidental markdown fences
           if text.startswith('```'):
               text = text.split('\n', 1)[1] if '\n' in text else text
               text = text.rstrip('`').strip()
@@ -96,37 +96,75 @@ jobs:
               elif f.get('severity') in ('medium', 'low', 'info'):
                   verdict = 'neutral'
 
-          # Escape for GitHub output
-          findings_json = json.dumps(findings).replace('%', '%25').replace('\n', '%0A').replace('\r', '%0D')
+          # Write to files — avoids special-character issues with GITHUB_OUTPUT
+          with open('/tmp/findings.json', 'w') as f:
+              json.dump(findings, f)
+          with open('/tmp/verdict.txt', 'w') as f:
+              f.write(verdict)
 
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
-              out.write(f"findings={findings_json}\n")
-              out.write(f"verdict={verdict}\n")
-              out.write(f"count={len(findings)}\n")
+          # POST to local orchestrator via tunnel so findings appear in dashboard
+          orchestrator_url = os.environ.get('ORCHESTRATOR_TUNNEL_URL', '').rstrip('/')
+          if orchestrator_url:
+              try:
+                  pr_payload = json.dumps({
+                      "action": "synchronize",
+                      "repo": os.environ.get('GITHUB_REPOSITORY', ''),
+                      "pr_number": int(os.environ.get('PR_NUMBER', '0')),
+                      "head_sha": os.environ.get('GITHUB_SHA', 'unknown'),
+                      "base_sha": "",
+                      "head_ref": os.environ.get('GITHUB_HEAD_REF', ''),
+                      "base_ref": os.environ.get('GITHUB_BASE_REF', 'main'),
+                      "title": os.environ.get('PR_TITLE', ''),
+                      "draft": False,
+                      "additions": 0,
+                      "deletions": 0,
+                      "installation_id": 0,
+                      "glm_findings": findings,
+                  }).encode()
+                  tunnel_req = urllib.request.Request(
+                      f"{orchestrator_url}/scan/pr",
+                      data=pr_payload,
+                      headers={"Content-Type": "application/json"},
+                  )
+                  with urllib.request.urlopen(tunnel_req, timeout=15) as r:
+                      print(f"Orchestrator: {r.read().decode()}")
+              except Exception as ex:
+                  print(f"Orchestrator tunnel error (non-fatal): {ex}")
 
           print(f"Verdict: {verdict} | Findings: {len(findings)}")
           PYEOF
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ORCHESTRATOR_TUNNEL_URL: ${{ secrets.ORCHESTRATOR_TUNNEL_URL }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
 
       - name: Post PR comment
         uses: actions/github-script@v7
         with:
           script: |
-            const raw = `${{ steps.scan.outputs.findings }}`;
-            const findings = JSON.parse(decodeURIComponent(raw));
-            const verdict  = `${{ steps.scan.outputs.verdict }}`;
+            const fs = require('fs');
+            const findings = JSON.parse(fs.readFileSync('/tmp/findings.json', 'utf8'));
+            const verdict  = fs.readFileSync('/tmp/verdict.txt', 'utf8').trim();
 
-            const SEV = { critical: '🔴 CRITICAL', high: '🟠 HIGH', medium: '🟡 MEDIUM', low: '🔵 LOW', info: '⚪ INFO' };
+            const SEV = {
+              critical: '🔴 CRITICAL',
+              high:     '🟠 HIGH',
+              medium:   '🟡 MEDIUM',
+              low:      '🔵 LOW',
+              info:     '⚪ INFO'
+            };
 
             let body = '';
-            if (verdict === 'pass') {
+            if (verdict === 'pass' || findings.length === 0) {
               body = '## ✅ Security Gate — Clean\n\nNo security issues found in this PR.';
             } else {
               const icon = verdict === 'fail' ? '❌' : '⚠️';
               body = `## ${icon} Security Gate — ${findings.length} finding${findings.length !== 1 ? 's' : ''} found\n\n`;
               for (const f of findings) {
-                body += `### ${SEV[f.severity] || f.severity} — ${f.title}\n`;
+                body += `### ${SEV[f.severity] || f.severity.toUpperCase()} — ${f.title}\n`;
                 if (f.file_path) body += `**File:** \`${f.file_path}\`${f.line ? ` · line ${f.line}` : ''}\n`;
                 if (f.owasp_tag) body += `**OWASP:** ${f.owasp_tag}\n`;
                 body += `\n${f.description}\n\n`;
@@ -136,7 +174,7 @@ jobs:
               body += `*Powered by GLM 5.3-flash via Security Gate*`;
             }
 
-            // Remove previous Security Gate comments to avoid spam
+            // Remove old Security Gate comments to avoid spam
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
